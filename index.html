@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title></title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  </head>
+
+  <body>
+    <input type="number" name="userId" placeholder="Enter user id" />
+
+    <button onclick="hello(input.value)">Say Hi to the user</button>
+    <p id="greeting"></p>
+    <script>
+      const input = document.querySelector("input");
+      let array = [];
+
+      const fetchUser = (userId) => {
+        fetch(`https://reqres.in/api/users/${userId}`)
+          .then((response) => {
+            if (response.status === 200) {
+              let user = response.json();
+              return user;
+            } else {
+              console.log(
+                "Something went wrong. Status code is " + response.status
+              );
+              return {};
+            }
+          })
+          .then((user) => {
+            console.log(user);
+            document.getElementById("greeting").innerHTML =
+              "Hi " + user.data.first_name;
+            array.push({ id: userId, userName: user.data.first_name });
+            localStorage.setItem("names", JSON.stringify(array));
+          })
+          .catch((error) => {
+            console.log("Something went wrong. Status code is " + error);
+          });
+      };
+
+      const hello = (inputId) => {
+        let users = JSON.parse(localStorage.getItem("names"));
+        if (users === null) {
+          fetchUser(inputId);
+          console.log("first fetch");
+        } else {
+          let currentUser = users.filter((user) => {
+            console.log(inputId, user.id);
+            return inputId === user.id;
+          });
+
+          if (currentUser[0]) {
+            document.getElementById("greeting").innerHTML =
+              "Hi " + currentUser[0].userName;
+            console.log("Got userName from local storage");
+          } else {
+            fetchUser(inputId);
+            console.log("new user is requested");
+          }
+        }
+      };
+    </script>
+  </body>
+</html>
